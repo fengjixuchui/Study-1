@@ -13,10 +13,10 @@
     - [2.2.3 action moudle](#223-action-moudle)
     - [2.2.4 模块学习](#224-模块学习)
 - [3 ansible\-playbook](#3-ansible-playbook)
-- [4 Playbook(剧本)](#4-playbook剧本)
-  - [4.1 一个简单的playbook](#41-一个简单的playbook)
-  - [4.2 playbook中的元素](#42-playbook中的元素)
-    - [4.2.1 hosts and remote\_user](#421-hosts-and-remote_user)
+  - [3.1 Playbook(剧本)](#31-playbook剧本)
+  - [3.2 一个简单的playbook](#32-一个简单的playbook)
+  - [3.3 playbook中的元素](#33-playbook中的元素)
+    - [3.3.1 hosts and remote\_user](#331-hosts-and-remote_user)
     - [4.2.2 tasks](#422-tasks)
     - [4.2.3 vars](#423-vars)
     - [4.2.4 handlers](#424-handlers)
@@ -271,9 +271,7 @@ kolla\-ansible的**action module**存放的位置是**ansible/action\_plugins**.
 
 # 3 ansible\-playbook
 
-待补充
-
-# 4 Playbook(剧本)
+## 3.1 Playbook(剧本)
 
 前文提到的**ansible命令**，都是一些**类似shell命令**的功能，如果要做一些比较**复杂的操作**，比如说：部署一个**java应用**到**10台服务器**上，一个模块显然是无法完成的，需要**安装模块**，**配置模块**，**文件传输模块**，**服务状态管理模块等**模块**联合工作**才能完成。
 
@@ -287,7 +285,7 @@ kolla\-ansible的**action module**存放的位置是**ansible/action\_plugins**.
 ansible-playbook -i /usr/share/kolla-ansible/ansible/inventory/all-in-one -e @/etc/kolla/globals.yml -e @/etc/kolla/passwords.yml -e CONFIG_DIR=/etc/kolla  -e action=deploy /usr/share/kolla-ansible/ansible/site.yml
 ```
 
-## 4.1 一个简单的playbook
+## 3.2 一个简单的playbook
 
 ```
 ---
@@ -312,9 +310,9 @@ ansible-playbook -i /usr/share/kolla-ansible/ansible/inventory/all-in-one -e @/e
 
 这个playbook来自ansible官网，包含了一个play，功能是在所有webservers节点上安装配置apache服务，如果配置文件被重写，重启apache服务，在任务的最后，确保服务在启动状态。
 
-## 4.2 playbook中的元素
+## 3.3 playbook中的元素
 
-### 4.2.1 hosts and remote\_user
+### 3.3.1 hosts and remote\_user
 
 play中的**hosts**代表这个play要在**哪些主机**上执行，这里可以使**一个**或者**多个主机**，也可以是**一个**或者**多个主机组**。
 

@@ -263,10 +263,10 @@ kolla\-ansible的**action module**存放的位置是**ansible/action\_plugins**.
 
 ### 2.2.4 模块学习
 
-不建议深入去学，太多了，用到的时候一个个去查就好了
+用的话再一个个去查
 
 - 这篇文章介绍了ansible常用模块的用法：http://blog.csdn.net/iloveyin/article/details/46982023
-- ansible官网提供了所有module的用法：http://docs.ansible.com/ansible/latest/modules_by_category.html
+- ansible官网提供了所有module的用法：https://docs.ansible.com/ansible/latest/modules/modules_by_category.html
 - ansible 所有module源码存放路径：/usr/lib/python2.7/site-packages/ansible/modules/
 
 # 3 ansible\-playbook

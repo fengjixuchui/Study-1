@@ -255,7 +255,7 @@ ansible-doc -M /usr/share/kolla-ansible/ansible/library -v merge_configs
 
 如上文所述，ansible moudle**最终执行的位置是目标机器**，所以module脚本的执行**依赖于目标机器上安装了对应的库**，如果目标机器上没有安装对应的库，脚本变不能执行成功。这种情况下，如果我们不打算去改动目标机器，可以使用**action moudle**，action moudle是一种用来在**管理机器上执行**，但是可以最终**作用到目标机器上的module**。
 
-例如，OpenStack/kolla-ansible项目部署容器时，几乎对**每一台机器**都要**生成自己对应的配置文件**，如果这个步骤在**目标机器**上执行，那么需要在每个**目标机器**上都按照配置文件对应的**依赖python库**。
+例如，OpenStack/kolla\-ansible项目部署容器时，几乎对**每一台机器**都要**生成自己对应的配置文件**，如果这个步骤在**目标机器**上执行，那么需要在每个**目标机器**上都按照配置文件对应的**依赖python库**。
 
 为了减少依赖，kolla\-ansible定义了**action module**，在**部署节点生成配置文件**，然后通过**cp module**将生成的文件**拷贝到目标节点**，这样就不必在每个被部署节点都安装yml，**oslo\_config等python库**，目标机器只需要支持scp即可。
 

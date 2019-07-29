@@ -220,7 +220,6 @@ options: {}
 
 from ansible.module_utils.basic import AnsibleModule
 
-
 def main():
     module = AnsibleModule(
         argument_spec=dict(

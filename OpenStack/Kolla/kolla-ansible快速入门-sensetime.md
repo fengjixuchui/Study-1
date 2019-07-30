@@ -632,7 +632,7 @@ pci_objects:
     - enable_custom_conf | bool
 
 - name: Custom device passthrough and sriov configuration
-  // 利用merge_configs
+  // 利用merge_configs将透传配置文件和vgpu配置文件合并为nova.conf
   merge_configs:
     sources:
       - "{{ role_path }}/templates/conf/passthrough.conf.j2"
@@ -645,6 +645,7 @@ pci_objects:
 
 - name: Clean external ceph nova-compute.conf
   file:
+    // 清除ceph的nova-compute.conf文件
     state: absent
     path: "{{ node_custom_config }}/nova/nova-compute.conf"
   when:
@@ -652,6 +653,7 @@ pci_objects:
     - nova_backend_ceph | bool
 
 - name: Generate external ceph nova-compute.conf
+  // 生成ceph的nova-compute.conf文件
   merge_configs:
     sources:
       - "{{ role_path }}/templates/conf/external_ceph.conf.j2"

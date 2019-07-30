@@ -30,6 +30,7 @@
     - [4.2.2 在主机文件中定义主机的透传设备](#422-在主机文件中定义主机的透传设备)
     - [4.2.1 添加custom\-configure命令](#421-添加custom-configure命令)
     - [4.2.2 添加playbook](#422-添加playbook)
+    - [4.2.3 添加tasks](#423-添加tasks)
 - [6 参考](#6-参考)
 
 <!-- /code_chunk_output -->
@@ -553,52 +554,140 @@ pci_objects:
       msg: "{{ kolla_action }}"
 
 - name: Get pci passthrough list
-  hosts: compute  //主机文件中的计算节点
+  hosts: compute  //遍历主机文件中的所有计算节点
   gather_facts: F
   tasks:
-
+  // 打印主机的透传设备列表信息
   - name: Get pci passthrough list
     debug:
       msg: "{{ pci_pass_list }}"
     when: pci_pass_list is defined
 
 - name: Get vGPU type list
-  hosts: compute
+  hosts: compute  //主机文件中的计算节点
   gather_facts: F
   tasks:
+  // 打印主机的透传vGPU列表信息
   - name: Get vGPU type list
     debug:
       msg: "{{ vgpu_types_list }}"
     when: vgpu_types_list is defined
 
 - name: Apply role nova
-  hosts: deployment
+  hosts: deployment // 当前部署节点
   serial: '{{ kolla_serial|default("0") }}'
   gather_facts: F
   roles:
+    // 去role为nova的下面执行
     - { role: nova, 
         tags: nova, 
         when: "(enable_nova | bool) and (enable_custom_conf | bool)" }
 
 - name: Apply role glance
-  hosts: deployment
+  hosts: deployment // 当前部署节点
   serial: '{{ kolla_serial|default("0") }}'
   gather_facts: F
   roles:
+    // 去role为glance的下面执行
     - { role: glance, 
         tags: glance,
         when: "(enable_glance | bool) and (enable_custom_conf | bool)" }
 
 - name: Apply role cinder
-  hosts: deployment
+  hosts: deployment // 当前部署节点
   serial: '{{ kolla_serial|default("0") }}'
   gather_facts: F
   roles:
+    // 去role为cinder的下面执行
     - { role: cinder, 
         tags: cinder,
         when: "((enable_cinder | bool) or (enable_cinder_backup | bool)) and (enable_custom_conf | bool)" }
 ```
 
+透传设备涉及的是nova, 所以这里以nova为例继续
+
+### 4.2.3 添加tasks
+
+创建kolla\-ansible/ansible/roles/nova/tasks/custom\-configure.yml文件
+
+```yml
+---
+# 这里面是task, 而不是playbook, 所以里面不能定义tasks了
+- name: Clean nova custom configure
+  file:
+    // 删除主机名(item)的nova.conf文件
+    state: absent
+    path: "{{ node_custom_config }}/nova/{{ item }}/nova.conf"
+  loop: "{{ groups['custom-configure'] }}"
+  when:
+    - enable_custom_conf | bool
+
+- name: Init nova custom configure
+  file:
+    // 创建主机名(item)的目录
+    state: directory
+    path: "{{ node_custom_config }}/nova/{{ item }}"
+  loop: "{{ groups['custom-configure'] }}"
+  when:
+    - enable_custom_conf | bool
+
+- name: Custom device passthrough and sriov configuration
+  // 利用merge_configs
+  merge_configs:
+    sources:
+      - "{{ role_path }}/templates/conf/passthrough.conf.j2"
+      - "{{ role_path }}/templates/conf/vgpu.conf.j2"
+    dest: "{{ node_custom_config }}/nova/{{ item }}/nova.conf"
+    mode: "0660"
+  loop: "{{ groups['custom-configure'] }}"
+  when:
+    - enable_custom_conf | bool
+
+- name: Clean external ceph nova-compute.conf
+  file:
+    state: absent
+    path: "{{ node_custom_config }}/nova/nova-compute.conf"
+  when:
+    - enable_external_ceph | bool
+    - nova_backend_ceph | bool
+
+- name: Generate external ceph nova-compute.conf
+  merge_configs:
+    sources:
+      - "{{ role_path }}/templates/conf/external_ceph.conf.j2"
+    dest: "{{ node_custom_config }}/nova/nova-compute.conf"
+    mode: "0660"
+  when:
+    - enable_external_ceph | bool
+    - nova_backend_ceph | bool
+
+- name: Clean external ceph configure keyring and ceph.conf
+  file:
+    state: absent
+    path: '{{ item }}'
+  with_items:
+    - '{{ node_custom_config }}/nova/ceph.client.nova.keyring'
+    - '{{ node_custom_config }}/nova/ceph.conf'
+    - '{{ node_custom_config }}/nova/ceph.client.cinder.keyring'
+  when:
+    - enable_external_ceph | bool
+    - nova_backend_ceph | bool
+
+- name: Copy nova external ceph keyring and ceph.conf
+  copy:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    owner: root 
+    group: root 
+    mode: 644
+  with_items:
+    - { src: '{{ external_ceph_conf_dir }}/ceph.client.nova.keyring', dest: '{{ node_custom_config }}/nova/ceph.client.nova.keyring' }
+    - { src: '{{ external_ceph_conf_dir }}/ceph.conf', dest: '{{ node_custom_config }}/nova/ceph.conf' }
+    - { src: '{{ external_ceph_conf_dir }}/ceph.client.cinder-volume.keyring', dest: '{{ node_custom_config }}/nova/ceph.client.cinder.keyring' }
+  when:
+    - enable_external_ceph | bool
+    - nova_backend_ceph | bool
+```
 
 # 6 参考
 

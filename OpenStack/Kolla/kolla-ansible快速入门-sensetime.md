@@ -32,7 +32,7 @@
     - [4.2.2 添加playbook](#422-添加playbook)
     - [4.2.3 添加tasks](#423-添加tasks)
     - [4.2.4 创建passthrough的模板文件](#424-创建passthrough的模板文件)
-- [6 参考](#6-参考)
+- [5 参考](#5-参考)
 
 <!-- /code_chunk_output -->
 
@@ -731,7 +731,7 @@ passthrough_whitelist = {{ passthrough_whitelist|join(',') }}
 
 整体思路就是这样, 里面都是很细的代码实现, 一些代码层面的最好
 
-# 6 参考
+# 5 参考
 
 - ansible入门书：https://ansible-book.gitbooks.io/ansible-first-book/content/begin/basic_module/module_list_details.html
 - ansible循环用法：http://www.cnblogs.com/PythonOrg/p/6593910.html

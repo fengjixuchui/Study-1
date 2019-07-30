@@ -24,6 +24,8 @@
     - [3.4.1 role](#341-role)
     - [3.4.2 include](#342-include)
 - [4 custom\-configure的实现](#4-custom-configure的实现)
+  - [4.1 功能的目的](#41-功能的目的)
+  - [4.2 效果](#42-效果)
 - [6 参考](#6-参考)
 
 <!-- /code_chunk_output -->
@@ -459,11 +461,20 @@ deploy playbook又由**多个不同的playbook组成**，根据用户的配置�
 
 # 4 custom\-configure的实现
 
-涉及的mr: 
+涉及的主要mr: 
 
 - http://gitlab.bj.sensetime.com/platform/AutoStack/merge_requests/14/diffs
 - http://gitlab.bj.sensetime.com/platform/AutoStack/merge_requests/15/diffs
-- 
+- http://gitlab.bj.sensetime.com/platform/AutoStack/merge_requests/20/diffs
+- http://gitlab.bj.sensetime.com/platform/AutoStack/merge_requests/27/diffs
+
+## 4.1 功能的目的
+
+将openstack不同服务, 相同服务不同主机的自定义配置文件由手动生成变成自动生成. 包括设备透传、vGPU、global ceph等功能的配置文件, 这里主要讲一下
+
+## 4.2 效果
+
+在/etc/kolla/config等目录下自动生成配置文件
 
 # 6 参考
 

@@ -24,9 +24,11 @@
     - [3.4.1 role](#341-role)
     - [3.4.2 include](#342-include)
 - [4 custom\-configure的实现](#4-custom-configure的实现)
-  - [4.1 功能的目的](#41-功能的目的)
+  - [4.1 功能背景](#41-功能背景)
   - [4.2 代码实现分析](#42-代码实现分析)
-    - [4.2.1 添加一个命令](#421-添加一个命令)
+    - [4.2.1 定义所有可用信息](#421-定义所有可用信息)
+    - [4.2.2 在主机文件中定义主机的透传设备](#422-在主机文件中定义主机的透传设备)
+    - [4.2.1 添加custom\-configure命令](#421-添加custom-configure命令)
     - [4.2.2 添加playbook](#422-添加playbook)
 - [6 参考](#6-参考)
 
@@ -470,17 +472,62 @@ deploy playbook又由**多个不同的playbook组成**，根据用户的配置�
 - http://gitlab.bj.sensetime.com/platform/AutoStack/merge_requests/20/diffs
 - http://gitlab.bj.sensetime.com/platform/AutoStack/merge_requests/27/diffs
 
-## 4.1 功能的目的
+## 4.1 功能背景
 
-将openstack不同服务, 相同服务不同主机的自定义配置文件由手动生成变成自动生成. 包括设备透传、vGPU、global ceph等功能的配置文件, 这里我们以生成passthrough配置文件为例说明.
+目的将openstack不同服务, 相同服务不同主机的自定义配置文件由手动生成变成自动生成. 
+
+包括设备透传、vGPU、global ceph等功能的配置文件, 这里我们以生成passthrough配置文件为例说明.
 
 ## 4.2 代码实现分析
 
-### 4.2.1 添加一个命令
+### 4.2.1 定义所有可用信息
+
+在etc/kolla/global.yml中, 定义了所有可以透传的pci设备信息
+
+```yml
+pci_objects:
+  gpu_1080ti:
+    vendor_id: "10de"
+    product_id: "1b06"
+    device_type: "type-PCI"
+  gpu_v100:
+    vendor_id: "10de"
+    product_id: "1db5"
+    device_type: "type-PCI"
+  gpu_p4:
+    vendor_id: "10de"
+    product_id: "1bb3"
+    device_type: "type-PCI"
+  nvme_intel:
+    vendor_id: "8086"
+    product_id: "0a54"
+    device_type: "type-PCI"
+  mlnx_ib_6:
+    vendor_id: "15b3"
+    product_id: "101c"
+    device_type: "type-VF"
+  mlnx_ib_3:
+    vendor_id: "15b3"
+    product_id: "1004"
+    device_type: "type-VF"
+```
+
+### 4.2.2 在主机文件中定义主机的透传设备
+
+文件multinode
+
+```
+[compute]
+10.121.2.122   pci_pass_list='gpu_1080ti, gpu_v100'
+```
+
+这里的列表内容就是上面`pci_objects`的子项的名字
+
+### 4.2.1 添加custom\-configure命令
 
 在kolla\-ansible/tools/kolla\-ansible中, 添加命令相关内容, 核心内容如下, 详见mr
 
-```
+```sh
 (custom-configure)
         ACTION="Custom configure"
         PLAYBOOK="${BASEDIR}/ansible/custom-configure.yml"
@@ -492,7 +539,66 @@ deploy playbook又由**多个不同的playbook组成**，根据用户的配置�
 
 ### 4.2.2 添加playbook
 
-创建kolla\-ansible/ansible/custom\-configure.yml文件.
+创建kolla\-ansible/ansible/custom\-configure.yml文件. 注释如下
+
+```yml
+---
+- name: Print kolla action
+  hosts: deployment //当前部署节点
+  gather_facts: F
+  tasks:
+  // 打印kolla_action
+  - name: Get kolla_action
+    debug:
+      msg: "{{ kolla_action }}"
+
+- name: Get pci passthrough list
+  hosts: compute  //主机文件中的计算节点
+  gather_facts: F
+  tasks:
+
+  - name: Get pci passthrough list
+    debug:
+      msg: "{{ pci_pass_list }}"
+    when: pci_pass_list is defined
+
+- name: Get vGPU type list
+  hosts: compute
+  gather_facts: F
+  tasks:
+  - name: Get vGPU type list
+    debug:
+      msg: "{{ vgpu_types_list }}"
+    when: vgpu_types_list is defined
+
+- name: Apply role nova
+  hosts: deployment
+  serial: '{{ kolla_serial|default("0") }}'
+  gather_facts: F
+  roles:
+    - { role: nova, 
+        tags: nova, 
+        when: "(enable_nova | bool) and (enable_custom_conf | bool)" }
+
+- name: Apply role glance
+  hosts: deployment
+  serial: '{{ kolla_serial|default("0") }}'
+  gather_facts: F
+  roles:
+    - { role: glance, 
+        tags: glance,
+        when: "(enable_glance | bool) and (enable_custom_conf | bool)" }
+
+- name: Apply role cinder
+  hosts: deployment
+  serial: '{{ kolla_serial|default("0") }}'
+  gather_facts: F
+  roles:
+    - { role: cinder, 
+        tags: cinder,
+        when: "((enable_cinder | bool) or (enable_cinder_backup | bool)) and (enable_custom_conf | bool)" }
+```
+
 
 # 6 参考
 

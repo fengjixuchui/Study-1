@@ -17,11 +17,11 @@
   - [3.2 一个简单的playbook](#32-一个简单的playbook)
   - [3.3 playbook中的元素](#33-playbook中的元素)
     - [3.3.1 hosts and remote\_user](#331-hosts-and-remote_user)
-    - [4.2.2 tasks](#422-tasks)
-    - [4.2.3 vars](#423-vars)
-    - [4.2.4 handlers](#424-handlers)
-  - [4.3 使用role和include更好的组织playbook](#43-使用role和include更好的组织playbook)
-    - [4.3.1 role](#431-role)
+    - [3.3.2 tasks](#332-tasks)
+    - [3.3.3 vars](#333-vars)
+    - [3.3.4 handlers](#334-handlers)
+  - [3.4 使用role和include更好的组织playbook](#34-使用role和include更好的组织playbook)
+    - [3.4.1 role](#341-role)
     - [4.3.2 include](#432-include)
 - [5 kolla\-ansible中常见的ansible语法](#5-kolla-ansible中常见的ansible语法)
   - [5.1 条件语句](#51-条件语句)
@@ -330,15 +330,15 @@ remote\_user可以细化到**task层**。
       remote_user: yourname
 ```
 
-### 4.2.2 tasks
+### 3.3.2 tasks
 
 task是要在目标机器上执行的一个最小任务，一个play可以包含**多个task**，所有的task顺序执行。
 
-### 4.2.3 vars
+### 3.3.3 vars
 
 在play中可以定义一些参数，如上文webservers中定义的http\_port和max\_clients，这两个参数会作用到这个play中的task上，最终template模块会使用这两个参数的值来生成目标配置文件。
 
-### 4.2.4 handlers
+### 3.3.4 handlers
 
 当**某个task**对主机造成了改变时，可以**触发notify**操作，notify会唤起对应的handler处理该变化。
 
@@ -362,9 +362,9 @@ tasks:
       notify: "restart web services"
 ```
 
-## 4.3 使用role和include更好的组织playbook
+## 3.4 使用role和include更好的组织playbook
 
-### 4.3.1 role
+### 3.4.1 role
 
 上文给出的**webserver playbook**中，**task**和**hanler**的部分是最通用的，vars部分其次，hosts参数最次。
 

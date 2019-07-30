@@ -25,7 +25,9 @@
     - [3.4.2 include](#342-include)
 - [4 custom\-configure的实现](#4-custom-configure的实现)
   - [4.1 功能的目的](#41-功能的目的)
-  - [4.2 效果](#42-效果)
+  - [4.2 代码实现分析](#42-代码实现分析)
+    - [4.2.1 添加一个命令](#421-添加一个命令)
+    - [4.2.2 添加playbook](#422-添加playbook)
 - [6 参考](#6-参考)
 
 <!-- /code_chunk_output -->
@@ -470,11 +472,27 @@ deploy playbook又由**多个不同的playbook组成**，根据用户的配置�
 
 ## 4.1 功能的目的
 
-将openstack不同服务, 相同服务不同主机的自定义配置文件由手动生成变成自动生成. 包括设备透传、vGPU、global ceph等功能的配置文件, 这里主要讲一下
+将openstack不同服务, 相同服务不同主机的自定义配置文件由手动生成变成自动生成. 包括设备透传、vGPU、global ceph等功能的配置文件, 这里我们以生成passthrough配置文件为例说明.
 
-## 4.2 效果
+## 4.2 代码实现分析
 
-在/etc/kolla/config等目录下自动生成配置文件
+### 4.2.1 添加一个命令
+
+在kolla\-ansible/tools/kolla\-ansible中, 添加命令相关内容, 核心内容如下, 详见mr
+
+```
+(custom-configure)
+        ACTION="Custom configure"
+        PLAYBOOK="${BASEDIR}/ansible/custom-configure.yml"
+        EXTRA_OPTS="$EXTRA_OPTS -e kolla_action=custom-configure"
+        ;;
+```
+
+这样根据该脚本逻辑, 会去执行kolla\-ansible/ansible/custom\-configure.yml中内容, kolla\_action=custom\-configure
+
+### 4.2.2 添加playbook
+
+创建kolla\-ansible/ansible/custom\-configure.yml文件.
 
 # 6 参考
 

@@ -23,6 +23,7 @@
   - [3.4 使用role和include更好的组织playbook](#34-使用role和include更好的组织playbook)
     - [3.4.1 role](#341-role)
     - [3.4.2 include](#342-include)
+- [4 custom\-configure的实现](#4-custom-configure的实现)
 - [6 参考](#6-参考)
 
 <!-- /code_chunk_output -->
@@ -455,6 +456,14 @@ deploy.yml
 deploy playbook又由**多个不同的playbook组成**，根据用户的配置的参数，有不同的组合方式，很灵活。
 
 我的理解是，在**role**的**task**中，**一个play**就好像一个**内部函数**，**一个playbook**是由一个由**多个play组成的公有函数**，被其他**playbook**根据**include参数组合调用**。
+
+# 4 custom\-configure的实现
+
+涉及的mr: 
+
+- http://gitlab.bj.sensetime.com/platform/AutoStack/merge_requests/14/diffs
+- http://gitlab.bj.sensetime.com/platform/AutoStack/merge_requests/15/diffs
+- 
 
 # 6 参考
 

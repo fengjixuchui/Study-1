@@ -619,7 +619,6 @@ wait_for 可以让ansible等待一段时间，直到条件满足，再继续向�
 
 # 6 参考
 
-- https://www.cnblogs.com/zhangyufei/p/7645804.html
 - ansible入门书：https://ansible-book.gitbooks.io/ansible-first-book/content/begin/basic_module/module_list_details.html
 - ansible循环用法：http://www.cnblogs.com/PythonOrg/p/6593910.html
 - 自定义过滤器:http://rfyiamcool.blog.51cto.com/1030776/1440686/

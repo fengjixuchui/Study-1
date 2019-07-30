@@ -31,6 +31,7 @@
     - [4.2.1 添加custom\-configure命令](#421-添加custom-configure命令)
     - [4.2.2 添加playbook](#422-添加playbook)
     - [4.2.3 添加tasks](#423-添加tasks)
+    - [4.2.4 创建passthrough的模板文件](#424-创建passthrough的模板文件)
 - [6 参考](#6-参考)
 
 <!-- /code_chunk_output -->
@@ -690,6 +691,45 @@ pci_objects:
     - enable_external_ceph | bool
     - nova_backend_ceph | bool
 ```
+
+我们只关注`利用merge\_configs将透传配置文件和vgpu配置文件合并为nova.conf`
+
+### 4.2.4 创建passthrough的模板文件
+
+```conf
+[pci]
+{% set passthrough_whitelist = [] %}
+
+{% for pci_key in pci_objects.keys() %}
+{% set pci_node_list = hostvars[item].get('pci_pass_list') %}
+{% if pci_node_list and (pci_key in hostvars[item]['pci_pass_list']) %}
+alias = {"vendor_id":"{{ pci_objects[pci_key]["vendor_id"]}}", "product_id":"{{ pci_objects[pci_key]["product_id"]}}", "device_type":"{{ pci_objects[pci_key]["device_type"]}}", "name":"{{ pci_key}}"}
+{% set alias_pci = '{"vendor_id":"' + pci_objects[pci_key]["vendor_id"] + '", "product_id":"' + pci_objects[pci_key]["product_id"] + '"}' %}
+{% do passthrough_whitelist.append(alias_pci) %}
+{% continue %}
+{% endif %}
+
+{% if item in groups['control'] %}
+{% for compute_node in groups['compute'] %}
+{% if hostvars[compute_node].get('pci_pass_list') and (pci_key in hostvars[compute_node]['pci_pass_list']) and (item != compute_node) %}
+alias = {"vendor_id":"{{ pci_objects[pci_key]["vendor_id"]}}", "product_id":"{{ pci_objects[pci_key]["product_id"]}}", "device_type":"{{ pci_objects[pci_key]["device_type"]}}", "name":"{{ pci_key}}"}
+{% break %}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+
+{% if passthrough_whitelist %}
+{% if passthrough_whitelist|length > 1 %}
+passthrough_whitelist = [{{ passthrough_whitelist|join(',') }}]
+{% else %}
+passthrough_whitelist = {{ passthrough_whitelist|join(',') }}
+{% endif %}
+{% endif %}
+```
+
+整体思路就是这样, 里面都是很细的代码实现, 一些代码层面的最好
 
 # 6 参考
 

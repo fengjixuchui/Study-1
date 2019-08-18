@@ -18,7 +18,7 @@
   - [1.12 uptime -- 系统运行时间与平均负荷](#112-uptime-系统运行时间与平均负荷)
   - [1.13 lsof -- 列出当前系统打开文件](#113-lsof-列出当前系统打开文件)
   - [1.14 perf -- 性能调优工具](#114-perf-性能调优工具)
-  - [1.15 sar -- 查看CPU负载信息](#115-sar-查看cpu负载信息)
+  - [1.15 sar -- 多方面对系统的活动进行报告](#115-sar-多方面对系统的活动进行报告)
 - [2 常用的性能测试工具](#2-常用的性能测试工具)
   - [2.1 Linux observability tools | Linux性能测试工具](#21-linux-observability-tools-linux性能测试工具)
   - [2.2 Linux benchmarking tools | Linux 性能测评工具](#22-linux-benchmarking-tools-linux-性能测评工具)
@@ -343,7 +343,9 @@ perf是Linux kernel自带的系统性能优化工具。优势在于与Linux Kern
 
 汇总：结合以上常用的性能测试命令并联系文初的性能分析工具的图，就可以初步了解到性能分析过程中哪个方面的性能使用哪方面的工具（命令）。
 
-## 1.15 sar -- 查看CPU负载信息
+## 1.15 sar -- 多方面对系统的活动进行报告
+
+sar（System Activity Reporter系统活动情况报告）是目前 Linux 上最为全面的系统性能分析工具之一，可以从多方面对系统的活动进行报告，包括：文件的读写情况、系统调用的使用情况、磁盘I/O、CPU效率、内存使用状况、进程活动及IPC有关的活动等。本文主要以CentOS 6.3 x64系统为例，介绍sar命令。
 
 
 
